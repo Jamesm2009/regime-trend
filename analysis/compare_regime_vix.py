@@ -19,75 +19,9 @@ Run this on the droplet (needs both Yahoo Finance and Redis access):
 """
 import numpy as np
 import pandas as pd
-import yfinance as yf
 
 from redis_client import get_json
-
-# --- VIX Term Trigger reconstruction ---
-# NOTE: confirmed by James — VIX Term Trigger's "Neutral" band is -0.5 to +0.5.
-ZSCORE_WINDOW = 63
-NEUTRAL_BAND = 0.5
-VIX_TERM_WEIGHT = 0.70
-MOMENTUM_WEIGHT = 0.30
-
-
-def fetch_vix_trigger_inputs(years_back: int = 11) -> pd.DataFrame:
-    start = (pd.Timestamp.today() - pd.DateOffset(years=years_back)).strftime("%Y-%m-%d")
-
-    def pull(ticker):
-        df = yf.download(ticker, start=start, progress=False, auto_adjust=True)
-        s = df["Close"]
-        if isinstance(s, pd.DataFrame):
-            s = s.iloc[:, 0]
-        return s
-
-    spy = pull("SPY")
-    vix = pull("^VIX")
-    vix9d = pull("^VIX9D")  # launched 2011, should cover the full 10yr window
-
-    merged = pd.concat([spy, vix, vix9d], axis=1, join="inner").dropna()
-    merged.columns = ["spy", "vix", "vix9d"]
-    return merged.sort_index()
-
-
-def compute_vix_trigger(merged: pd.DataFrame) -> pd.DataFrame:
-    df = merged.copy()
-
-    # VIX term structure: VIX9D/VIX ratio, inverted so +z = risk-on
-    # (a ratio < 1, i.e. backwardation, signals near-term stress = risk-off,
-    # so we invert the raw ratio before z-scoring to match the dashboard's
-    # "+z = risk-on" convention)
-    ratio = df["vix9d"] / df["vix"]
-    inverted_ratio = -ratio
-    df["vix_term_z"] = (
-        (inverted_ratio - inverted_ratio.rolling(ZSCORE_WINDOW).mean())
-        / inverted_ratio.rolling(ZSCORE_WINDOW).std()
-    )
-
-    # SPY 5-day rate of change, z-scored
-    spy_roc = df["spy"].pct_change(5)
-    df["spy_mom_z"] = (
-        (spy_roc - spy_roc.rolling(ZSCORE_WINDOW).mean())
-        / spy_roc.rolling(ZSCORE_WINDOW).std()
-    )
-
-    df["composite_z"] = VIX_TERM_WEIGHT * df["vix_term_z"] + MOMENTUM_WEIGHT * df["spy_mom_z"]
-
-    def classify(z):
-        if pd.isna(z):
-            return None
-        if z < -1:
-            return "Risk Off"
-        if z < -NEUTRAL_BAND:
-            return "Lean Off"
-        if z <= NEUTRAL_BAND:
-            return "Neutral"
-        if z <= 1:
-            return "Lean On"
-        return "Risk On"
-
-    df["classification"] = df["composite_z"].apply(classify)
-    return df.dropna(subset=["composite_z"])
+from vix_trigger import fetch_vix_trigger_inputs, compute_vix_trigger
 
 
 def load_regime_trend_history() -> pd.DataFrame:
@@ -110,7 +44,7 @@ REGIME_NAME = {0: "Crisis", 1: "Transitional", 2: "Calm"}
 
 def main():
     print("Fetching VIX Term Trigger inputs (SPY, VIX, VIX9D)...")
-    raw = fetch_vix_trigger_inputs()
+    raw = fetch_vix_trigger_inputs(years_back=11)
     print(f"  {len(raw)} days, {raw.index.min().date()} to {raw.index.max().date()}")
 
     vtt = compute_vix_trigger(raw)
