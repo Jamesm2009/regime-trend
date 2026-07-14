@@ -10,6 +10,7 @@ import {
   ResponsiveContainer,
   ReferenceArea,
 } from "recharts";
+import GuideModal from "./GuideModal";
 
 const REGIME_COLOR = ["#C4362C", "#D9A441", "#3FA796"]; // crisis, transitional, calm
 const REGIME_NAME = ["Crisis", "Transitional", "Calm"];
@@ -31,6 +32,7 @@ type ApiData = {
 export default function Home() {
   const [data, setData] = useState<ApiData | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [showGuide, setShowGuide] = useState(false);
 
   useEffect(() => {
     fetch("/api/regime")
@@ -85,11 +87,21 @@ export default function Home() {
             SPY · VIX · TNX — 10yr rolling window, 3-state HMM
           </p>
         </div>
-        <div className="text-xs text-subtext font-mono text-right">
-          <div>as of {modelParams.last_date}</div>
-          <div>refit {modelParams.refit_date}</div>
+        <div className="flex items-center gap-4">
+          <button
+            onClick={() => setShowGuide(true)}
+            className="text-xs font-mono text-subtext hover:text-text border border-hairline rounded px-3 py-1.5 uppercase tracking-widest transition-colors"
+          >
+            Guide
+          </button>
+          <div className="text-xs text-subtext font-mono text-right">
+            <div>as of {modelParams.last_date}</div>
+            <div>refit {modelParams.refit_date}</div>
+          </div>
         </div>
       </header>
+
+      {showGuide && <GuideModal onClose={() => setShowGuide(false)} />}
 
       {/* Hero: current regime readout */}
       <section className="mb-10 bg-panel border border-hairline rounded-lg p-8">
