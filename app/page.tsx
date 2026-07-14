@@ -17,6 +17,33 @@ const REGIME_NAME = ["Crisis", "Transitional", "Calm"];
 const YAXIS_WIDTH = 50; // must match the YAxis `width` prop below — used to offset the tape
 const CHART_MARGIN = 5; // must match the AreaChart `margin` prop below
 
+function vttColor(classification: string): string {
+  switch (classification) {
+    case "Risk Off":
+      return "#C4362C";
+    case "Lean Off":
+      return "#D9748A"; // muted rose — between crisis red and neutral amber
+    case "Neutral":
+      return "#D9A441";
+    case "Lean On":
+      return "#7FC9A8"; // light teal — between neutral and full calm
+    case "Risk On":
+      return "#3FA796";
+    default:
+      return "#A9AFB8";
+  }
+}
+
+type VttReading = {
+  date: string;
+  composite_z: number;
+  classification: string;
+  vix_term_z: number;
+  spy_mom_z: number;
+  vix: number;
+  vix9d: number;
+};
+
 type ApiData = {
   modelParams: {
     last_date: string;
@@ -29,6 +56,7 @@ type ApiData = {
     filtered_probs: number[][];
     spy_close: number[];
   };
+  vtt: VttReading | null;
 };
 
 export default function Home() {
@@ -61,7 +89,7 @@ export default function Home() {
     );
   }
 
-  const { modelParams, history } = data;
+  const { modelParams, history, vtt } = data;
   const currentProbs = history.filtered_probs[history.filtered_probs.length - 1];
   const currentRegime = currentProbs.indexOf(Math.max(...currentProbs));
 
@@ -142,8 +170,38 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Price chart with regime-shaded background — tape lives in the same panel,
-          offset to align exactly with the chart's plot area (past the Y-axis) */}
+      {/* VIX Term Trigger cross-reference — faster-reacting external indicator, shown for context */}
+      {vtt && (
+        <section className="mb-10 bg-panel border border-hairline rounded-lg p-6">
+          <div className="flex justify-between items-start mb-4 flex-wrap gap-2">
+            <div className="text-subtext text-xs uppercase tracking-widest">
+              VIX Term Trigger (cross-reference)
+            </div>
+            <a
+              href="https://riskindicator-v4.vercel.app"
+              target="_blank"
+              rel="noopener noreferrer"
+              className="text-xs font-mono text-subtext hover:text-text border border-hairline rounded px-3 py-1 uppercase tracking-widest transition-colors"
+            >
+              Open App →
+            </a>
+          </div>
+          <div className="flex items-end gap-4">
+            <div
+              className="text-2xl md:text-3xl font-mono font-semibold"
+              style={{ color: vttColor(vtt.classification) }}
+            >
+              {vtt.classification}
+            </div>
+            <div className="text-lg font-mono text-subtext mb-0.5">
+              z={vtt.composite_z.toFixed(2)}
+            </div>
+            <div className="text-xs text-subtext font-mono mb-1 ml-auto">
+              as of {vtt.date}
+            </div>
+          </div>
+        </section>
+      )}
       <section className="mb-10 bg-panel border border-hairline rounded-lg p-6">
         <div className="text-subtext text-xs uppercase tracking-widest mb-4">
           SPY vs. Detected Regime
