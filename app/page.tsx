@@ -168,8 +168,8 @@ export default function Home() {
           <AreaChart data={chartData}>
             <defs>
               <linearGradient id="priceFill" x1="0" y1="0" x2="0" y2="1">
-                <stop offset="0%" stopColor="#E8EAED" stopOpacity={0.25} />
-                <stop offset="100%" stopColor="#E8EAED" stopOpacity={0} />
+                <stop offset="0%" stopColor="#FFFFFF" stopOpacity={0.35} />
+                <stop offset="100%" stopColor="#FFFFFF" stopOpacity={0} />
               </linearGradient>
             </defs>
             {segments.map((seg, i) => (
@@ -178,38 +178,38 @@ export default function Home() {
                 x1={chartData[seg.start].date}
                 x2={chartData[seg.end].date}
                 fill={REGIME_COLOR[seg.regime]}
-                fillOpacity={0.12}
+                fillOpacity={0.18}
                 stroke="none"
               />
             ))}
             <XAxis
               dataKey="date"
-              tick={{ fill: "#8A9099", fontSize: 11, fontFamily: "IBM Plex Mono" }}
+              tick={{ fill: "#A9AFB8", fontSize: 11, fontFamily: "IBM Plex Mono" }}
               tickLine={false}
-              axisLine={{ stroke: "#262B31" }}
+              axisLine={{ stroke: "#31373E" }}
               minTickGap={80}
             />
             <YAxis
-              tick={{ fill: "#8A9099", fontSize: 11, fontFamily: "IBM Plex Mono" }}
+              tick={{ fill: "#A9AFB8", fontSize: 11, fontFamily: "IBM Plex Mono" }}
               tickLine={false}
-              axisLine={{ stroke: "#262B31" }}
+              axisLine={{ stroke: "#31373E" }}
               domain={["auto", "auto"]}
             />
             <Tooltip
               contentStyle={{
                 background: "#14181D",
-                border: "1px solid #262B31",
+                border: "1px solid #31373E",
                 borderRadius: 6,
                 fontFamily: "IBM Plex Mono",
                 fontSize: 12,
               }}
-              labelStyle={{ color: "#8A9099" }}
+              labelStyle={{ color: "#A9AFB8" }}
             />
             <Area
               type="monotone"
               dataKey="price"
-              stroke="#E8EAED"
-              strokeWidth={1.5}
+              stroke="#FFFFFF"
+              strokeWidth={1.75}
               fill="url(#priceFill)"
             />
           </AreaChart>
@@ -240,7 +240,7 @@ function StatCard({ label, value, color }: { label: string; value: string; color
   return (
     <div className="bg-panel border border-hairline rounded-lg p-5">
       <div className="text-subtext text-xs uppercase tracking-widest mb-2">{label}</div>
-      <div className="font-mono text-2xl" style={{ color: color || "#E8EAED" }}>
+      <div className="font-mono text-2xl" style={{ color: color || "#F3F5F7" }}>
         {value}
       </div>
     </div>
