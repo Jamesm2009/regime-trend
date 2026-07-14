@@ -42,6 +42,8 @@ type VttReading = {
   spy_mom_z: number;
   vix: number;
   vix9d: number;
+  vix9d_stale: boolean;
+  vix9d_last_actual_date: string | null;
 };
 
 type ApiData = {
@@ -200,6 +202,12 @@ export default function Home() {
               as of {vtt.date}
             </div>
           </div>
+          {vtt.vix9d_stale && (
+            <div className="mt-3 text-xs font-mono text-transitional border border-hairline rounded px-3 py-2 bg-ink/40">
+              ⚠ VIX9D data last updated {vtt.vix9d_last_actual_date} — this reading uses a
+              carried-forward value and may not reflect today&apos;s actual VIX9D move.
+            </div>
+          )}
         </section>
       )}
       <section className="mb-10 bg-panel border border-hairline rounded-lg p-6">
