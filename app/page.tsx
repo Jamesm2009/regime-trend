@@ -180,7 +180,7 @@ export default function Home() {
               VIX Term Trigger (cross-reference)
             </div>
             <a
-              href="https://riskindicator-v4.vercel.app"
+              href="https://risk-indicator-v4.vercel.app"
               target="_blank"
               rel="noopener noreferrer"
               className="text-xs font-mono text-subtext hover:text-text border border-hairline rounded px-3 py-1 uppercase tracking-widest transition-colors"
