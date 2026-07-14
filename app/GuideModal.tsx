@@ -92,7 +92,7 @@ export default function GuideModal({ onClose }: { onClose: () => void }) {
               <li>A shift toward Crisis with rising confidence is a reason to reduce risk appetite or tighten hedges — not to panic-sell on day one.</li>
               <li>Sustained Calm readings support staying the course on longer-horizon positioning.</li>
               <li>Transitional readings are a signal to wait for more confirmation rather than act on ambiguity.</li>
-              <li>Cross-reference with your other dashboards (Macro Regime Tracker, CTA positioning) — agreement across independent models is more meaningful than either alone.</li>
+              <li>Cross-reference with VIX Term Trigger (shown above) and your other dashboards — agreement across independent models is more meaningful than either alone. See below for how these two specifically relate.</li>
             </ul>
           </section>
 
@@ -103,6 +103,36 @@ export default function GuideModal({ onClose }: { onClose: () => void }) {
               current-regime confidence updates daily after market close using the prior day&apos;s
               model — this is what gives near-real-time detection without the cost of refitting
               every day.
+            </p>
+          </section>
+
+          <section>
+            <h3 className="text-text font-semibold mb-2">The VIX Term Trigger reading</h3>
+            <p className="text-subtext mb-2">
+              The reading shown above is a separate tool (
+              <a
+                href="https://riskindicator-v4.vercel.app"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="underline hover:text-text"
+              >
+                open the full app
+              </a>
+              ) — a faster z-scored composite of VIX term structure (VIX9D vs. VIX) and SPY 5-day
+              momentum. It reacts to near-term stress on a day-to-day basis, while regime-trend
+              describes the broader statistical character of the market over weeks to months.
+              They are not measuring the same thing, and a backtest against 10 years of real data
+              confirms they behave differently:
+            </p>
+            <ul className="text-subtext list-disc list-inside space-y-1">
+              <li>On sharp, obvious shocks (Volmageddon, the Covid crash), both flagged the same day — neither has a real speed edge on major moves.</li>
+              <li>During regime-trend&apos;s Crisis periods, VIX Term Trigger only read Risk Off or Lean Off about 44% of the time — it&apos;s reacting to moment-to-moment stress spikes within a sustained crisis, not the crisis itself.</li>
+              <li>About 1 in 5 of VIX Term Trigger&apos;s Risk Off signals fired while regime-trend still read the market as Calm — a meaningful false-alarm-looking rate in isolation.</li>
+            </ul>
+            <p className="text-subtext mt-2">
+              Practical takeaway: treat a VIX Term Trigger Risk Off signal as higher-conviction
+              when regime-trend is also in Crisis or Transitional, and more skeptically when
+              regime-trend still reads Calm.
             </p>
           </section>
 
