@@ -17,6 +17,23 @@ from types import SimpleNamespace
 from data_fetch import fetch_features
 from regime_model import filter_step
 from redis_client import get_json, set_json
+from vix_trigger import get_current_reading
+
+
+def update_vtt_reading():
+    """
+    Fetches and stores today's VIX Term Trigger reading, shown alongside
+    regime-trend on the dashboard for cross-reference. Wrapped separately
+    so a VTT-specific failure (e.g. a Yahoo hiccup on ^VIX9D) never blocks
+    the main regime update above.
+    """
+    try:
+        reading = get_current_reading()
+        set_json("vtt_current", reading)
+        print(f"VIX Term Trigger: {reading['classification']} (z={reading['composite_z']}) "
+              f"as of {reading['date']}")
+    except Exception as e:
+        print(f"VIX Term Trigger update failed (non-fatal): {e}")
 
 
 def main():
@@ -36,6 +53,7 @@ def main():
 
     if new_rows.empty:
         print(f"No new trading days since {last_date.date()}. Nothing to do.")
+        update_vtt_reading()
         return
 
     # Reconstruct a minimal model-like object with just what filter_step needs
@@ -68,6 +86,8 @@ def main():
     set_json("model_params", model_params)
     set_json("history", history)
     print(f"Updated through {new_dates[-1]}.")
+
+    update_vtt_reading()
 
 
 if __name__ == "__main__":
