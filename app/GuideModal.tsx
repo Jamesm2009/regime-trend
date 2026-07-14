@@ -8,16 +8,21 @@ export default function GuideModal({ onClose }: { onClose: () => void }) {
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => e.key === "Escape" && onClose();
     window.addEventListener("keydown", onKey);
-    return () => window.removeEventListener("keydown", onKey);
+    const prevOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      window.removeEventListener("keydown", onKey);
+      document.body.style.overflow = prevOverflow;
+    };
   }, [onClose]);
 
   return (
     <div
-      className="fixed inset-0 z-50 bg-black/70 flex items-start md:items-center justify-center p-4 md:p-8 overflow-y-auto"
+      className="fixed inset-0 z-50 bg-black/70 flex items-center justify-center p-4 md:p-8"
       onClick={onClose}
     >
       <div
-        className="bg-panel border border-hairline rounded-lg max-w-2xl w-full my-8 p-8"
+        className="bg-panel border border-hairline rounded-lg max-w-2xl w-full max-h-[85vh] overflow-y-auto p-8"
         onClick={(e) => e.stopPropagation()}
       >
         <div className="flex justify-between items-start mb-6">
