@@ -19,9 +19,10 @@ async function getJson(key: string) {
 
 export async function GET() {
   try {
-    const [modelParams, history] = await Promise.all([
+    const [modelParams, history, vtt] = await Promise.all([
       getJson("model_params"),
       getJson("history"),
+      getJson("vtt_current"),
     ]);
 
     if (!modelParams || !history) {
@@ -31,7 +32,7 @@ export async function GET() {
       );
     }
 
-    return NextResponse.json({ modelParams, history });
+    return NextResponse.json({ modelParams, history, vtt });
   } catch (err: any) {
     return NextResponse.json({ error: err.message }, { status: 500 });
   }
