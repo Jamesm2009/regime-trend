@@ -14,6 +14,8 @@ import GuideModal from "./GuideModal";
 
 const REGIME_COLOR = ["#C4362C", "#D9A441", "#3FA796"]; // crisis, transitional, calm
 const REGIME_NAME = ["Crisis", "Transitional", "Calm"];
+const YAXIS_WIDTH = 50; // must match the YAxis `width` prop below — used to offset the tape
+const CHART_MARGIN = 5; // must match the AreaChart `margin` prop below
 
 type ApiData = {
   modelParams: {
@@ -140,32 +142,40 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Regime tape — signature element: compressed full-history strip */}
-      <section className="mb-10">
-        <div className="text-subtext text-xs uppercase tracking-widest mb-2">
-          Regime Tape — {history.dates[0]} to {history.dates[history.dates.length - 1]}
-        </div>
-        <div className="flex h-6 rounded overflow-hidden border border-hairline">
-          {segments.map((seg, i) => (
-            <div
-              key={i}
-              style={{
-                flexGrow: seg.end - seg.start + 1,
-                background: REGIME_COLOR[seg.regime],
-              }}
-              title={`${REGIME_NAME[seg.regime]}: ${history.dates[seg.start]} to ${history.dates[seg.end]}`}
-            />
-          ))}
-        </div>
-      </section>
-
-      {/* Price chart with regime-shaded background */}
+      {/* Price chart with regime-shaded background — tape lives in the same panel,
+          offset to align exactly with the chart's plot area (past the Y-axis) */}
       <section className="mb-10 bg-panel border border-hairline rounded-lg p-6">
         <div className="text-subtext text-xs uppercase tracking-widest mb-4">
           SPY vs. Detected Regime
         </div>
+
+        <div className="flex mb-2">
+          <div style={{ width: YAXIS_WIDTH + CHART_MARGIN }} />
+          <div
+            className="flex h-5 rounded overflow-hidden border border-hairline flex-1"
+            style={{ marginRight: CHART_MARGIN }}
+          >
+            {segments.map((seg, i) => (
+              <div
+                key={i}
+                style={{
+                  flexGrow: seg.end - seg.start + 1,
+                  background: REGIME_COLOR[seg.regime],
+                }}
+                title={`${REGIME_NAME[seg.regime]}: ${history.dates[seg.start]} to ${history.dates[seg.end]}`}
+              />
+            ))}
+          </div>
+        </div>
+        <div className="flex mb-4">
+          <div style={{ width: YAXIS_WIDTH + CHART_MARGIN }} />
+          <div className="text-subtext text-xs font-mono flex-1" style={{ marginRight: CHART_MARGIN }}>
+            {history.dates[0]} to {history.dates[history.dates.length - 1]}
+          </div>
+        </div>
+
         <ResponsiveContainer width="100%" height={360}>
-          <AreaChart data={chartData}>
+          <AreaChart data={chartData} margin={{ top: 5, right: CHART_MARGIN, left: CHART_MARGIN, bottom: 5 }}>
             <defs>
               <linearGradient id="priceFill" x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor="#FFFFFF" stopOpacity={0.35} />
@@ -178,7 +188,7 @@ export default function Home() {
                 x1={chartData[seg.start].date}
                 x2={chartData[seg.end].date}
                 fill={REGIME_COLOR[seg.regime]}
-                fillOpacity={0.18}
+                fillOpacity={0.32}
                 stroke="none"
               />
             ))}
@@ -190,6 +200,7 @@ export default function Home() {
               minTickGap={80}
             />
             <YAxis
+              width={YAXIS_WIDTH}
               tick={{ fill: "#A9AFB8", fontSize: 11, fontFamily: "IBM Plex Mono" }}
               tickLine={false}
               axisLine={{ stroke: "#31373E" }}
